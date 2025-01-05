@@ -56,8 +56,8 @@ class TokenType(Enum):
     REL_OP = 'REL_OP'  # Relational operators (==, !=, <, >, <=, >=)
 
     # Punctuation/Special Symbols
-    LPAREN = 'LPAREN'  # '('
-    RPAREN = 'RPAREN'  # ')'
+    LPAREN = '('  # '('
+    RPAREN = ')'  # ')'
     LBRACE = 'LBRACE'  # '{'
     RBRACE = 'RBRACE'  # '}'
     LSQUARE = 'LSQUARE'  # '['

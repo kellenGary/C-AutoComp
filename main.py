@@ -15,8 +15,8 @@ def main():
     tokenizer.tokenize()
 
     # tokenizer.printTokens(None)
-
     parser = Parser(tokenizer.getTokens())
+    parser.parse()
 
 
 if __name__ == "__main__":

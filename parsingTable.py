@@ -7,6 +7,7 @@ class ParsingTable:
         self.states = []
         self.transitions = {}
         self.build_states_and_transitions()
+        self.actions, self.goto = self.constructParsingTable()
 
     def constructParsingTable(self):
         action = {}
@@ -16,7 +17,7 @@ class ParsingTable:
                 # Shift
                 if item.dot < len(item.rhs):
                     symbol = item.rhs[item.dot]
-                    if symbol in self.grammar.terminals:
+                    if symbol and symbol in self.grammar.terminals:
                         action[(state_index, symbol)] = ('shift', self.transitions[(state_index, symbol)])
 
                 # Reduce
@@ -32,7 +33,6 @@ class ParsingTable:
             for symbol in self.grammar.non_terminals:
                 if (state_index, symbol) in self.transitions:
                     goto[(state_index, symbol)] = self.transitions[(state_index, symbol)]
-
         return action, goto
 
     def closure(self, items):
@@ -44,7 +44,7 @@ class ParsingTable:
                 if item.dot < len(item.rhs):
                     symbol = item.rhs[item.dot]
                     if symbol in self.grammar.non_terminals:
-                        for production in self.grammar.get_rules_for(symbol):
+                        for production in self.grammar.get_lhs_rules(symbol):
                             rhs_tuple = tuple(production[1])
                             new_items.add(Production(symbol, rhs_tuple, item.lookahead))
             if len(new_items) == len(closure_items):

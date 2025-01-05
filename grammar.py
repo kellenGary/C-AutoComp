@@ -22,7 +22,7 @@ class Grammar:
             if symbol.islower() or symbol.isdigit() or symbol in ['(', ')', ',', ';', '=', '+', '-', '*', '/']:
                 self.terminals.add(symbol)
 
-    def get_rules_for(self, non_terminal):
+    def get_lhs_rules(self, non_terminal):
         """
         Retrieve all rules for a given non-terminal.
         Args:
@@ -31,6 +31,9 @@ class Grammar:
             list: Rules with the given non-terminal as LHS.
         """
         return [rule for rule in self.rules if rule[0] == non_terminal]
+
+    def get_rhs_rules(self, non_terminal):
+        return [rule for rule in self.rules if rule[1] == non_terminal]
 
     def __str__(self):
         """
