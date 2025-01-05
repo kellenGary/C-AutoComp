@@ -13,10 +13,10 @@ def main():
 
     tokenizer = Tokenizer(input_file_path)
     tokenizer.tokenize()
-    tokenizer.printTokens(None)
 
-    # tokens = tokenizer.getTokens()
-    # parser = Parser(tokens)
+    # tokenizer.printTokens(None)
+
+    parser = Parser(tokenizer.getTokens())
 
 
 if __name__ == "__main__":

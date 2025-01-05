@@ -1,142 +1,141 @@
-
-
 class Grammar:
-    """C Grammar written by ChatGPT"""
     def __init__(self):
-        # Define terminals (tokens)
-        self.tokens = [
-            "IDENTIFIER", "CONSTANT", "STRING_LITERAL", "TYPE",
-            "OPERATOR", "REL_OP", "ASSIGN_OP", "SEMI", "COMMA",
-            "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LSQUARE", "RSQUARE",
-            "RETURN", "IF", "ELSE", "WHILE", "FOR"
-        ]
+        self.rules = []  # Stores rules as tuples: (LHS, RHS)
+        self.non_terminals = set()
+        self.terminals = set()
+        self.start_symbol = None
+        self.buildGrammar()
 
-        # Define non-terminals
-        self.non_terminals = [
-            "program", "declaration_list", "declaration", "var_declaration",
-            "func_declaration", "param_list", "param", "statement",
-            "expr_stmt", "compound_stmt", "local_declarations",
-            "statement_list", "selection_stmt", "iteration_stmt",
-            "return_stmt", "expression", "assignment_expr",
-            "logical_or_expr", "logical_and_expr", "equality_expr",
-            "relational_expr", "additive_expr", "term", "factor",
-            "function_call", "arg_list"
-        ]
+    def add_rule(self, lhs, rhs):
+        """
+        Add a production.py rule to the grammar.
+        Args:
+            lhs (str): The left-hand side of the rule (a non-terminal).
+            rhs (list): The right-hand side of the rule (list of terminals/non-terminals).
+        """
+        if not self.start_symbol:
+            self.start_symbol = lhs  # First added rule defines the start symbol
 
-        # Grammar rules (productions)
-        self.rules = {
-            "program": [["declaration_list"]],
-            "declaration_list": [
-                ["declaration_list", "declaration"],
-                ["declaration"]
-            ],
-            "declaration": [
-                ["var_declaration"],
-                ["func_declaration"]
-            ],
-            "var_declaration": [
-                ["TYPE", "IDENTIFIER", "SEMI"],
-                ["TYPE", "IDENTIFIER", "LSQUARE", "CONSTANT", "RSQUARE", "SEMI"]
-            ],
-            "func_declaration": [
-                ["TYPE", "IDENTIFIER", "LPAREN", "param_list", "RPAREN", "compound_stmt"],
-                ["TYPE", "IDENTIFIER", "LPAREN", "RPAREN", "compound_stmt"]
-            ],
-            "param_list": [
-                ["param_list", "COMMA", "param"],
-                ["param"]
-            ],
-            "param": [
-                ["TYPE", "IDENTIFIER"]
-            ],
-            "statement": [
-                ["expr_stmt"],
-                ["compound_stmt"],
-                ["selection_stmt"],
-                ["iteration_stmt"],
-                ["return_stmt"]
-            ],
-            "expr_stmt": [
-                ["expression", "SEMI"],
-                ["SEMI"]
-            ],
-            "compound_stmt": [
-                ["LBRACE", "local_declarations", "statement_list", "RBRACE"],
-                ["LBRACE", "RBRACE"]
-            ],
-            "local_declarations": [
-                ["local_declarations", "var_declaration"],
-                []
-            ],
-            "statement_list": [
-                ["statement_list", "statement"],
-                []
-            ],
-            "selection_stmt": [
-                ["IF", "LPAREN", "expression", "RPAREN", "statement"],
-                ["IF", "LPAREN", "expression", "RPAREN", "statement", "ELSE", "statement"]
-            ],
-            "iteration_stmt": [
-                ["WHILE", "LPAREN", "expression", "RPAREN", "statement"],
-                ["FOR", "LPAREN", "expr_stmt", "expr_stmt", "RPAREN", "statement"],
-                ["FOR", "LPAREN", "expr_stmt", "expr_stmt", "expression", "RPAREN", "statement"]
-            ],
-            "return_stmt": [
-                ["RETURN", "SEMI"],
-                ["RETURN", "expression", "SEMI"]
-            ],
-            "expression": [
-                ["assignment_expr"]
-            ],
-            "assignment_expr": [
-                ["IDENTIFIER", "ASSIGN_OP", "expression"],
-                ["logical_or_expr"]
-            ],
-            "logical_or_expr": [
-                ["logical_or_expr", "||", "logical_and_expr"],
-                ["logical_and_expr"]
-            ],
-            "logical_and_expr": [
-                ["logical_and_expr", "&&", "equality_expr"],
-                ["equality_expr"]
-            ],
-            "equality_expr": [
-                ["equality_expr", "REL_OP", "relational_expr"],
-                ["relational_expr"]
-            ],
-            "relational_expr": [
-                ["relational_expr", "REL_OP", "additive_expr"],
-                ["additive_expr"]
-            ],
-            "additive_expr": [
-                ["additive_expr", "OPERATOR", "term"],
-                ["term"]
-            ],
-            "term": [
-                ["term", "OPERATOR", "factor"],
-                ["factor"]
-            ],
-            "factor": [
-                ["LPAREN", "expression", "RPAREN"],
-                ["IDENTIFIER"],
-                ["CONSTANT"],
-                ["STRING_LITERAL"]
-            ],
-            "function_call": [
-                ["IDENTIFIER", "LPAREN", "arg_list", "RPAREN"],
-                ["IDENTIFIER", "LPAREN", "RPAREN"]
-            ],
-            "arg_list": [
-                ["arg_list", "COMMA", "expression"],
-                ["expression"]
-            ]
-        }
+        self.rules.append((lhs, rhs))
+        self.non_terminals.add(lhs)
+        for symbol in rhs:
+            if symbol.islower() or symbol.isdigit() or symbol in ['(', ')', ',', ';', '=', '+', '-', '*', '/']:
+                self.terminals.add(symbol)
 
-    def get_rules(self):
-        return self.rules
+    def get_rules_for(self, non_terminal):
+        """
+        Retrieve all rules for a given non-terminal.
+        Args:
+            non_terminal (str): The non-terminal to retrieve rules for.
+        Returns:
+            list: Rules with the given non-terminal as LHS.
+        """
+        return [rule for rule in self.rules if rule[0] == non_terminal]
 
-    def get_tokens(self):
-        return self.tokens
+    def __str__(self):
+        """
+        Returns a string representation of the grammar.
+        """
+        grammar_str = "Grammar:\n"
+        for lhs, rhs in self.rules:
+            grammar_str += f"{lhs} → {' '.join(rhs)}\n"
+        return grammar_str
+    
+    def buildGrammar(self):
+        # Add grammar rules for C
 
-    def get_non_terminals(self):
-        return self.non_terminals
+        # Augmented rule for LR(1) parser
+        self.add_rule("S'", ["program"])
+
+        # Start with the program
+        self.add_rule("program", ["external_declaration", "program"])
+        self.add_rule("program", ["external_declaration"])
+        
+        # External declarations
+        self.add_rule("external_declaration", ["function_definition"])
+        self.add_rule("external_declaration", ["declaration"])
+        
+        # Function definitions
+        self.add_rule("function_definition", ["type_specifier", "IDENTIFIER", "(", "parameter_list", ")", "compound_statement"])
+        self.add_rule("function_definition", ["type_specifier", "IDENTIFIER", "(", ")", "compound_statement"])
+        
+        # Parameter list
+        self.add_rule("parameter_list", ["parameter_declaration"])
+        self.add_rule("parameter_list", ["parameter_list", ",", "parameter_declaration"])
+        
+        self.add_rule("parameter_declaration", ["type_specifier", "IDENTIFIER"])
+        
+        # Declarations
+        self.add_rule("declaration", ["storage_class_specifier", "type_specifier", "init_declarator_list", ";"])
+        self.add_rule("declaration", ["type_specifier", "init_declarator_list", ";"])
+        self.add_rule("declaration", ["type_specifier", ";"])
+        
+        # Init declarator list
+        self.add_rule("init_declarator_list", ["init_declarator"])
+        self.add_rule("init_declarator_list", ["init_declarator_list", ",", "init_declarator"])
+        
+        self.add_rule("init_declarator", ["IDENTIFIER"])
+        self.add_rule("init_declarator", ["IDENTIFIER", "=", "initializer"])
+        
+        self.add_rule("initializer", ["expression"])
+        
+        # Storage class specifiers
+        storage_classes = ["auto", "register", "static", "extern", "typedef"]
+        for sc in storage_classes:
+            self.add_rule("storage_class_specifier", [sc])
+        
+        # Type specifiers
+        type_specifiers = ["int", "float", "double", "char", "void", "long", "short", "signed", "unsigned"]
+        for ts in type_specifiers:
+            self.add_rule("type_specifier", [ts])
+        self.add_rule("type_specifier", ["struct", "IDENTIFIER"])
+        self.add_rule("type_specifier", ["union", "IDENTIFIER"])
+        self.add_rule("type_specifier", ["enum", "IDENTIFIER"])
+        
+        # Compound statement
+        self.add_rule("compound_statement", ["{", "block_item_list", "}"])
+        self.add_rule("block_item_list", ["block_item"])
+        self.add_rule("block_item_list", ["block_item_list", "block_item"])
+        self.add_rule("block_item", ["statement"])
+        self.add_rule("block_item", ["declaration"])
+        
+        # Statements
+        self.add_rule("statement", ["expression_statement"])
+        self.add_rule("statement", ["compound_statement"])
+        self.add_rule("statement", ["selection_statement"])
+        self.add_rule("statement", ["iteration_statement"])
+        self.add_rule("statement", ["jump_statement"])
+        
+        # Expression statement
+        self.add_rule("expression_statement", ["expression", ";"])
+        self.add_rule("expression_statement", [";"])
+        
+        # Selection statements
+        self.add_rule("selection_statement", ["if", "(", "expression", ")", "statement"])
+        self.add_rule("selection_statement", ["if", "(", "expression", ")", "statement", "else", "statement"])
+        self.add_rule("selection_statement", ["switch", "(", "expression", ")", "statement"])
+        
+        # Iteration statements
+        self.add_rule("iteration_statement", ["while", "(", "expression", ")", "statement"])
+        self.add_rule("iteration_statement", ["do", "statement", "while", "(", "expression", ")", ";"])
+        self.add_rule("iteration_statement", ["for", "(", "expression_statement", "expression_statement", ")", "statement"])
+        self.add_rule("iteration_statement", ["for", "(", "expression_statement", "expression_statement", "expression", ")", "statement"])
+        
+        # Jump statements
+        self.add_rule("jump_statement", ["goto", "IDENTIFIER", ";"])
+        self.add_rule("jump_statement", ["continue", ";"])
+        self.add_rule("jump_statement", ["break", ";"])
+        self.add_rule("jump_statement", ["return", "expression", ";"])
+        self.add_rule("jump_statement", ["return", ";"])
+        
+        # Expressions
+        self.add_rule("expression", ["assignment_expression"])
+        self.add_rule("expression", ["expression", ",", "assignment_expression"])
+        
+        self.add_rule("assignment_expression", ["IDENTIFIER", "=", "assignment_expression"])
+        self.add_rule("assignment_expression", ["logical_or_expression"])
+        
+        # Logical expressions (and so on for all operators)
+        self.add_rule("logical_or_expression", ["logical_and_expression"])
+        self.add_rule("logical_or_expression", ["logical_or_expression", "||", "logical_and_expression"])
+
