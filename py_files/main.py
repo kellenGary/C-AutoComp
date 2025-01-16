@@ -1,5 +1,6 @@
 import sys
-from tokenizer import Tokenizer
+from exprTokenizer import Tokenizer
+import yaccTableBuilder
 from parser import Parser
 
 
@@ -11,13 +12,14 @@ def main():
         return 0
     input_file_path = sys.argv[1]
 
+    # Seems weird but this builds the Parsing Table using ply.yacc
+    yaccTableBuilder
+
     tokenizer = Tokenizer(input_file_path)
     tokenizer.tokenize()
 
-    # tokenizer.printTokens(None)
-    parser = Parser(tokenizer.getTokens())
-    parser.parse()
-
+    parser = Parser()
+    parser.parse(tokenizer.getTokens())
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,12 @@
+from production import Production
+
+
 class Grammar:
     def __init__(self):
         self.rules = []  # Stores rules as tuples: (LHS, RHS)
         self.non_terminals = set()
         self.terminals = set()
-        self.start_symbol = None
+        self.start_production = None   # Gets set to S' when building grammar
         self.buildGrammar()
 
     def add_rule(self, lhs, rhs):
@@ -13,8 +16,8 @@ class Grammar:
             lhs (str): The left-hand side of the rule (a non-terminal).
             rhs (list): The right-hand side of the rule (list of terminals/non-terminals).
         """
-        if not self.start_symbol:
-            self.start_symbol = lhs  # First added rule defines the start symbol
+        if not self.start_production:
+            self.start_production = Production(lhs, rhs)  # First added rule defines the start symbol
 
         self.rules.append((lhs, rhs))
         self.non_terminals.add(lhs)
@@ -23,13 +26,6 @@ class Grammar:
                 self.terminals.add(symbol)
 
     def get_lhs_rules(self, non_terminal):
-        """
-        Retrieve all rules for a given non-terminal.
-        Args:
-            non_terminal (str): The non-terminal to retrieve rules for.
-        Returns:
-            list: Rules with the given non-terminal as LHS.
-        """
         return [rule for rule in self.rules if rule[0] == non_terminal]
 
     def get_rhs_rules(self, non_terminal):

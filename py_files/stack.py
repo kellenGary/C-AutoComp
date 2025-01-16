@@ -16,9 +16,17 @@ class Stack:
         cur = self.head.next
         out = ''
         while cur:
-            out += str(cur.value.value) + '->'
+            out += str(cur.value)
             cur = cur.next
         return out[:-2]
+
+    def getProduction(self):
+        out = []
+        cur = self.head.next
+        while cur:
+            out.append(cur.value.type)
+            cur = cur.next
+        return out
 
     def getSize(self):
         return self.size
