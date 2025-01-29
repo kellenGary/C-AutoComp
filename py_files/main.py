@@ -1,6 +1,6 @@
 import sys
-from exprTokenizer import Tokenizer
 import yaccTableBuilder
+from exprTokenizer import Tokenizer
 from parser import Parser
 
 
@@ -20,6 +20,7 @@ def main():
 
     parser = Parser()
     parser.parse(tokenizer.getTokens())
+
 
 if __name__ == "__main__":
     main()

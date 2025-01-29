@@ -1,26 +1,20 @@
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from openai import OpenAI
 
-
-# Load the model and tokenizer
-model_name = "SalesForce/codet5-base"
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+client = OpenAI(api_key="<DeepSeek API Key>", base_url="https://api.deepseek.com")
+grammar = ("program -> expr SEMICOLON;"
+           "expr -> expr ADD term | expr SUBTRACT term | term;"
+           "term -> term MULT factor | term DIVIDE factor | factor;"
+           "factor -> IDENTIFIER | LPAREN expr RPAREN")
 
 def fixTokens(input_code, invalid_tokens=None):
-    # Optionally process the invalid tokens (e.g., replace or highlight them)
-    if invalid_tokens:
-        # If invalid tokens are provided, we can highlight them in the input
-        for token in invalid_tokens:
-            input_code = input_code.replace(token, f"[INVALID]{token}[INVALID]")
-
-    # Tokenize the input code
-    inputs = tokenizer(input_code, return_tensors='pt')
-
-    # Generate the output code using the model
-    outputs = model.generate(**inputs, max_length=512, num_beams=5, early_stopping=True)
-
-    # Decode the generated output
-    generated_code = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    print("Corrected Code:", generated_code)
-
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant"},
+            {"role": "user",
+             "content": f"Fix the following incorrect tokens: {invalid_tokens}, within the code: {input_code} "
+                        f"using the grammar: {grammar}"}
+        ],
+        stream=False
+    )
+    print(response.choices[0].message.content)

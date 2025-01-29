@@ -61,6 +61,7 @@ class Tokenizer:
                     continue
 
                 if word.isdigit():
+                    # There will be bugs here when reading wrong identifiers like '9abTokenizer'
                     token = Token(TokenType.IDENTIFIER.value, word)
                     self.tokens.append(token)
                 elif self.isOperator(word):
