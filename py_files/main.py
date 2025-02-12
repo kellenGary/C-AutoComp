@@ -27,6 +27,7 @@ def main():
     code_gen.compile(ast)
     code_gen.save_ir_to_file('testoutput.ll')
     linker.compile_and_link('testoutput.ll')
+    print('Executable created')
 
 if __name__ == "__main__":
     main()
