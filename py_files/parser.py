@@ -13,7 +13,7 @@ class Parser:
 
     def parse(self, tokens):
         self.input_buffer = tokens + [Token('$end', None)]
-        print(_lr_action)
+        copied_buffer = self.input_buffer
         while True:
             current_state = self.state_stack[-1]
             next_token = self.input_buffer[0]
@@ -23,8 +23,10 @@ class Parser:
             if next_type not in _lr_action[current_state]:
                 print(f"Syntax error: Unexpected token {next_type}")
                 # Attempt error recovery
-                # fixTokens(self.stack, next_token)
-                break
+                tokens_left = len(self.input_buffer)
+                new_tokens = fixTokens(self.stack, next_token, copied_buffer, tokens_left)
+                self.input_buffer.insert(0, new_tokens)
+                continue
 
             action = _lr_action[current_state][next_type]
 
@@ -78,7 +80,6 @@ class Parser:
                     ast_node = ASTNode()
 
                 self.stack.push(ast_node)
-
                 # Perform the goto operation
                 goto_state = _lr_goto[self.state_stack[-1]][lhs]
                 self.state_stack.append(goto_state)

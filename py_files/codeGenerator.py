@@ -1,21 +1,58 @@
-from llvmlite import binding
+from llvmlite import ir
+from AST import *
 
-def generate(module):
-    binding.initialize()
-    binding.initialize_native_target()
-    binding.initialize_native_asmprinter()
+class LLVMCodeGen:
+    def __init__(self):
+        self.module = ir.Module(name="my_module")
+        self.builder = None
+        self.func = None
+        self.symbol_table = {}
 
-    target = binding.Target.from_default_triple()
-    target_machine = target.create_target_machine()
+    def generate_code(self, node):
+        """Recursively generates LLVM IR for an AST node."""
+        if isinstance(node, ProgramNode):
+            return self.generate_code(node.expr)
 
-    llvm_ir = str(module)
-    llvm_module = binding.parse_assembly(llvm_ir)
-    llvm_module.verify()
+        elif isinstance(node, BinaryOpNode):
+            left = self.generate_code(node.left)
+            right = self.generate_code(node.right)
 
-    # JIT Compile
-    engine = binding.create_mcjit_compiler(llvm_module, target_machine)
-    engine.finalize_object()
+            if self.builder:
+                if node.op == "+":
+                    return self.builder.add(left, right, name="addtmp")
+                elif node.op == "-":
+                    return self.builder.sub(left, right, name="subtmp")
+                elif node.op == "*":
+                    return self.builder.mul(left, right, name="multmp")
+                elif node.op == "/":
+                    return self.builder.sdiv(left, right, name="divtmp")
 
-    # Save as object file or execute
-    with open("output.o", "wb") as obj_file:
-        obj_file.write(target_machine.emit_object(llvm_module))
+        elif isinstance(node, IdentifierNode):
+            if node.name.isdigit():
+                return ir.Constant(ir.IntType(32), int(node.name))
+            else:
+                if node.name in self.symbol_table:
+                    return self.builder.load(self.symbol_table[node.name], name="loadtmp")
+                else:
+                    raise ValueError(f"Undefined variable: {node.name}")
+
+        elif isinstance(node, ParenExprNode):
+            return self.generate_code(node.expr)
+
+    def compile(self, ast):
+        """Creates an LLVM function to compute the expression."""
+        func_type = ir.FunctionType(ir.IntType(32), [])
+        self.func = ir.Function(self.module, func_type, name="main")
+
+        block = self.func.append_basic_block(name="entry")
+        self.builder = ir.IRBuilder(block)
+
+        result = self.generate_code(ast)
+        self.builder.ret(result)
+
+        return str(self.module)
+
+    def save_ir_to_file(self, filename="generated_code.ll"):
+        """Save the generated LLVM IR to a file."""
+        with open(filename, "w") as f:
+            f.write(str(self.module))

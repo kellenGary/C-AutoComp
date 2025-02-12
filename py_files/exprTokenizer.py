@@ -21,6 +21,9 @@ class Token:
         self.type = type
         self.value = value
 
+    def __repr__(self):
+        return f"{self.type}: {self.value}"
+
     def __hash__(self):
         return hash((self.type, self.value))
 

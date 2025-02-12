@@ -28,6 +28,7 @@ class IdentifierNode(ASTNode):
     def __repr__(self):
         return f"IdentifierNode({self.name})"
 
+
 class ParenExprNode(ASTNode):
     """Represents a parenthesized expression."""
     def __init__(self, expr):

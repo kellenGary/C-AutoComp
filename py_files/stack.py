@@ -16,7 +16,7 @@ class Stack:
         cur = self.head.next
         out = ''
         while cur:
-            out += str(cur.value)
+            out += str(cur.value) + ', '
             cur = cur.next
         return out[:-2]
 
@@ -57,3 +57,4 @@ class Stack:
         for i in range(len(tokens)):
             token = tokens[i]
             self.push(token)
+
